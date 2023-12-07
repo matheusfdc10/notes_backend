@@ -1,5 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { NoteRepository } from "../../repositories/NoteRepository";
+import { NoteNotFoundException } from "../../exceptions/NoteNotFoundException";
+import { NoteWitoutPermissionException } from "../../exceptions/NoteWitoutPermissionException";
 
 interface GetNoteRequest {
     noteId: string;
@@ -13,9 +15,11 @@ export class GetNoteUseCase {
     async execute({ noteId, userId }: GetNoteRequest) {
         const note = await this.noteRepository.findById(noteId)
 
-        if (!note) throw new NotFoundException()
+        if (!note) throw new NoteNotFoundException()
 
-        if (note.userId !== userId) throw new UnauthorizedException()
+        if (note.userId !== userId) throw new NoteWitoutPermissionException({
+            actionName: "recuperar"
+        })
 
         return note;
     }

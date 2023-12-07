@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { Note } from "../../entities/note";
+import { Injectable } from "@nestjs/common";
 import { NoteRepository } from "../../repositories/NoteRepository";
+import { NoteNotFoundException } from "../../exceptions/NoteNotFoundException";
+import { NoteWitoutPermissionException } from "../../exceptions/NoteWitoutPermissionException";
 
 interface EditNoteRequest {
     title: string;
@@ -16,9 +17,11 @@ export class EditNoteUseCase {
     async execute({ title, description, noteId, userId }: EditNoteRequest) {
         const note = await this.noteRepository.findById(noteId)
 
-        if (!note) throw new NotFoundException()
+        if (!note) throw new NoteNotFoundException()
 
-        if (note.userId !== userId) throw new UnauthorizedException()
+        if (note.userId !== userId) throw new NoteWitoutPermissionException({
+            actionName: "editar"
+        })
 
         note.title = title
         note.description = description ?? null

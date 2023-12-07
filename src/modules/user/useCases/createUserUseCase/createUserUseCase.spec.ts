@@ -1,6 +1,8 @@
 import { compare } from "bcrypt";
 import { UserRepositoryInMemory } from "../../repositories/UserRepositoryInMemory";
 import { CreateUserUseCase } from "./createUserUseCase";
+import { makeUser } from "../../factories/userFactory";
+import { UserWithSameEmailException } from "../../exceptions/UserWithSameEmailException";
 
 let createUserUseCase: CreateUserUseCase
 let userRepositoryInMemory: UserRepositoryInMemory
@@ -38,5 +40,17 @@ describe('Create User', () => {
         )
 
         expect(userHasPasswordEncrypted).toBeTruthy()
+    })
+
+    it("Should be able to throw error when create user with already exist email", async () => {
+        const user = makeUser({})
+
+        userRepositoryInMemory.users = [user]
+
+        expect(async () => await createUserUseCase.execute({
+            email: user.email,
+            name: "Matheus",
+            password: "123123"
+        })).rejects.toThrowError(UserWithSameEmailException)
     })
 });

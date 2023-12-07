@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
 import { NoteRepositoryInMemory } from "../../repositories/noteRepositoryInMemory"
 import { EditNoteUseCase } from "./editNoteUseCase";
-import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { makeNote } from "../../factories/noteFactory";
 import { makeUser } from "src/modules/user/factories/userFactory";
+import { NoteNotFoundException } from "../../exceptions/NoteNotFoundException";
+import { NoteWitoutPermissionException } from "../../exceptions/NoteWitoutPermissionException";
 
 let noteRepositoryInMemory: NoteRepositoryInMemory;
 let editNoteUseCase: EditNoteUseCase;
@@ -44,7 +45,7 @@ describe("Create Note", () => {
                 noteId: randomUUID(),
                 userId: randomUUID()
             })
-        }).rejects.toThrowError(NotFoundException)
+        }).rejects.toThrowError(NoteNotFoundException)
     })
 
     it("Should be able to throw error when note has another user", async () => {
@@ -58,6 +59,6 @@ describe("Create Note", () => {
                 noteId: note.id,
                 userId: randomUUID()
             })
-        }).rejects.toThrowError(UnauthorizedException)
+        }).rejects.toThrowError(NoteWitoutPermissionException)
     })
 })
